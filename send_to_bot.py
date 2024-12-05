@@ -1,14 +1,20 @@
+import os 
+from dotenv import load_dotenv
 import asyncio
 from telegram import Bot
 from telegram.error import TelegramError
 import argparse
-import sys
 
-# Substitua pelo token do seu bot
-token = '7682976744:AAHtEmUeFnm43eBIRFhgdJn-27PzmLayIMg'
+# Carregar as variáveis do arquivo config.env
+load_dotenv("config.env")
 
-# Substitua pelo ID do chat do seu bot ou do usuário (número inteiro)
-chat_id = 1142351974  # Certifique-se de usar um chat_id numérico
+# Obtém os valores do token e chat ID
+token = os.getenv("TELEGRAM_BOT_TOKEN")
+chat_id = os.getenv("TELEGRAM_CHAT_ID")
+
+# Valida se os dados foram carregados corretamente
+if not token or not chat_id:
+    raise ValueError("Token ou Chat ID não encontrados no arquivo config.env")
 
 # Cria o objeto Bot com o token fornecido
 bot = Bot(token)
@@ -18,14 +24,12 @@ async def send_message(message):
     try:
         await bot.send_message(chat_id=chat_id, text=message)
         print("Mensagem enviada com sucesso!")
-        return 0  # Sucesso
     except TelegramError as e:
         print(f"Erro ao enviar mensagem: {e}")
-        return 1  # Erro
 
 # Função principal para rodar a tarefa assíncrona
 async def main(message):
-    return await send_message(message)
+    await send_message(message)
 
 # Adiciona o suporte ao argumento --message
 if __name__ == '__main__':
@@ -37,6 +41,4 @@ if __name__ == '__main__':
     )
     args = parser.parse_args()
 
-    # Obtém o código de retorno e faz a saída
-    result = asyncio.run(main(args.message))
-    sys.exit(result)  # Sai com o código 0 (sucesso) ou 1 (erro)
+    asyncio.run(main(args.message))
